@@ -1,0 +1,18 @@
+{
+	"credentials": {
+		"c_user": "FACEBOOK ID HERE",
+		"xs": "FACEBOOK SESSION COOKIE HERE"
+	},
+	"debug": false,
+	"database": "./fblog.db",
+	"scraper": {
+		"cache_lb": true,
+		"sticky_expire": 1800,
+
+		"poll_interval": 300,
+		"request_timeout": 20,
+		"retry_timeout": 30,
+		"retry_limit": 2,
+		"chill_timeout": 120
+	}
+}
