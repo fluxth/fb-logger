@@ -50,9 +50,7 @@ try:
 		print('\nObtaining batch {}, {} users total...'.format(x+CHUNK, len(users)))
 
 		resp = requests.get(URL.format(qs=urlencode(qs)))
-		data.update(resp.json())
-
-		# print(data)
+		data = resp.json()
 
 		x += len(sel)
 
