@@ -26,8 +26,8 @@ token = input('Enter FB token > ')
 
 URL = 'https://graph.facebook.com/v2.6/?{qs}'
 qs = {
-	'fields': 'name',
-	'access_token': token
+    'fields': 'name',
+    'access_token': token
 }
 
 users = db.getUnnamedUsers()
@@ -39,44 +39,44 @@ CHUNK = 20
 
 c = db.conn.cursor()
 try:
-	x = 0
-	while x < len(users):
+    x = 0
+    while x < len(users):
 
-		sel = users[x:CHUNK+x]
-		uids = [str(u) for u in sel]
+        sel = users[x:CHUNK+x]
+        uids = [str(u) for u in sel]
 
-		qs['ids'] = ','.join(uids)
+        qs['ids'] = ','.join(uids)
 
-		print('\nObtaining batch {}, {} users total...'.format(x+CHUNK, len(users)))
+        print('\nObtaining batch {}, {} users total...'.format(x+CHUNK, len(users)))
 
-		resp = requests.get(URL.format(qs=urlencode(qs)))
-		data = resp.json()
+        resp = requests.get(URL.format(qs=urlencode(qs)))
+        data = resp.json()
 
-		x += len(sel)
+        x += len(sel)
 
-		if 'error' in data.keys():
-			print('An error occurred, skipping this batch.')
-			print(data)
-			continue
+        if 'error' in data.keys():
+            print('An error occurred, skipping this batch.')
+            print(data)
+            continue
 
-		for fbid in data:
-			user = data[fbid]
+        for fbid in data:
+            user = data[fbid]
 
-			q = "UPDATE `users` SET `name` = ? WHERE `fbid` = ?"
-			c.execute(q, (user['name'], int(user['id'])))
+            q = "UPDATE `users` SET `name` = ? WHERE `fbid` = ?"
+            c.execute(q, (user['name'], int(user['id'])))
 
-			print('{} > {}'.format(user['id'], user['name']))
+            print('{} > {}'.format(user['id'], user['name']))
 
-			processed.append(int(user['id']))
+            processed.append(int(user['id']))
 
-	skipped = [item for item in users if item not in processed]
+    skipped = [item for item in users if item not in processed]
 
-	if len(skipped) > 0:
-		print('\n[*] There are {} users not processed:'.format(len(skipped)))
-		for u in skipped:
-			print('- {}'.format(u))
+    if len(skipped) > 0:
+        print('\n[*] There are {} users not processed:'.format(len(skipped)))
+        for u in skipped:
+            print('- {}'.format(u))
 
 except KeyboardInterrupt:
-	print('QUIT')
+    print('QUIT')
 finally:
-	db.conn.commit()
+    db.conn.commit()
