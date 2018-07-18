@@ -11,7 +11,7 @@ class BuddyList:
 
     URL = 'https://{}-edge-chat.facebook.com/pull'
 
-    initialzed = False
+    initialized = False
 
     lb_id = 0
     client_id = 0
@@ -32,7 +32,7 @@ class BuddyList:
     def __init__(self, c_user=None, xs=None):
         self.setCredentials(c_user, xs)
         self.initializeSession()
-        self.initialzed = True
+        self.initialized = True
 
     def setConfig(self, config):
         self.config.update(config)
@@ -83,8 +83,8 @@ class BuddyList:
 
     def doRequest(self, url, qs, timeout=None):
 
-        if self.initialzed is not True:
-            raise NotInitialized('BuddyList is not correctly initialzed.')
+        if self.initialized is not True:
+            raise NotInitialized('BuddyList is not correctly initialized.')
 
         req = requests.Request('GET', '{}?{}'.format(url, urlencode(qs)))
         prep = self.session.prepare_request(req)

@@ -15,7 +15,7 @@ class LoggerApp():
     scraper = None
     db = None
 
-    def __init__(self, config_path):
+    def __init__(self, config_path='./config.json'):
         self.CONFIG_PATH = config_path
         self.initialize()
 
@@ -26,7 +26,7 @@ class LoggerApp():
 
     def loadConfig(self):
         # Load config.json
-        self.config = load_config('./config.json')
+        self.config = load_config(self.CONFIG_PATH)
 
     def setupScraper(self):
         self.scraper = BuddyList(
@@ -38,58 +38,64 @@ class LoggerApp():
     def setupDatabase(self):
         self.db = LogDatabase(self.config['database'])
 
+    def mainLoop(self):
+        while True:
+            dprint('Initial GET request')
+
+            blist = self.scraper.getBuddyList()
+            flist = self.scraper.parseFbResponse(blist)
+            self.scraper.saveToDB(flist, self.db, full=True)
+
+            seq = 2
+            try:
+                while True:
+                    if 'seq' in blist.keys():
+                        seq = blist['seq']
+
+                    flist = None
+
+                    try:
+                        dprint('Polling seq={}'.format(seq))
+                        blist = self.scraper.longPoll(seq)
+
+                    # handle failed polling
+                    except NetworkError as m:
+                        tsprint('Network Error: {}'.format(m))
+                        
+                        # Replace with config values
+                        time.sleep(10)
+                        continue
+
+                    if blist['t'] == 'heartbeat':
+                        dprint('Longpoll seq={} heartbeat.'.format(seq))
+
+                    elif blist['t'] == 'fullReload':
+                        dprint('Longpoll seq={} returned fullReload, try saving then reload.'.format(seq))
+                        flist = self.scraper.parseFbResponse(blist)
+                        # dict_merge(flist, fb.parseFbResponse(blist))
+
+                        raise LongPollReload('Got fullReload from longpoll packet.')
+
+                    elif blist['t'] == 'msg':
+                        flist = self.scraper.parseFbResponse(blist)
+
+                    else:
+                        raise LongPollReload('Got unknown packet type "{}".'.format(blist['t']))
+
+                    if flist is not None:
+                        self.scraper.saveToDB(flist, self.db)
+
+                    # Replace with config values
+                    time.sleep(0.1)
+
+            except LongPollReload as m:
+                tsprint('Longpoll Reload: '.format(m))
+                self.scraper.resetSession()
+                continue
+
     def run(self):
         try:
-            while True:
-                dprint('Initial GET request')
-
-                blist = self.scraper.getBuddyList()
-                flist = self.scraper.parseFbResponse(blist)
-                self.scraper.saveToDB(flist, self.db, full=True)
-
-                seq = 2
-                try:
-                    while True:
-                        if 'seq' in blist.keys():
-                            seq = blist['seq']
-
-                        flist = None
-
-                        try:
-                            dprint('Polling seq={}'.format(seq))
-                            blist = self.scraper.longPoll(seq)
-
-                        # handle failed polling
-                        except NetworkError as m:
-                            tsprint('Network Error: {}'.format(m))
-                            sleep(10)
-                            continue
-
-                        if blist['t'] == 'heartbeat':
-                            dprint('Longpoll seq={} heartbeat.'.format(seq))
-
-                        elif blist['t'] == 'fullReload':
-                            dprint('Longpoll seq={} returned fullReload, try saving then reload.'.format(seq))
-                            flist = self.scraper.parseFbResponse(blist)
-                            # dict_merge(flist, fb.parseFbResponse(blist))
-
-                            raise LongPollReload('Got fullReload from longpoll packet.')
-
-                        elif blist['t'] == 'msg':
-                            flist = self.scraper.parseFbResponse(blist)
-
-                        else:
-                            raise LongPollReload('Got unknown packet type "{}".'.format(blist['t']))
-
-                        if flist is not None:
-                            self.scraper.saveToDB(flist, self.db)
-
-                        time.sleep(0.1)
-
-                except LongPollReload as m:
-                    tsprint('Longpoll Reload: '.format(m))
-                    self.scraper.resetSession()
-                    continue
+            self.mainLoop()
         except KeyboardInterrupt:
             tsprint('User Quit.')
             sys.exit(0)
