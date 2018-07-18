@@ -119,3 +119,34 @@ class LogDatabase():
         c.execute(q)
 
         return [i[0] for i in c.fetchall()]
+
+    def listUsers(self):
+        c = self.conn.cursor()
+
+        # q = """
+        #     SELECT DISTINCT `u`.`id`, `u`.`fbid`, `u`.`name`, `l`.`lat`, `l`.`p`, `l`.`ts`
+        #     from `logs` AS `l`
+        #     INNER JOIN `users` AS `u` ON `u`.`id` = `l`.`uid`
+        #     ORDER BY `u`.`id` DESC
+        # """
+        q = """
+            SELECT `u`.`id`, `l`.`id`, `u`.`name`, `l`.`lat`, `l`.`p`, `l`.`ts`
+            FROM `users` AS `u`
+            LEFT OUTER JOIN `logs` AS `l` ON `u`.`id` = `l`.`uid`
+            WHERE `l`.`id` IN (SELECT MAX(`id`) FROM `logs` GROUP BY `uid`)
+            ORDER BY `l`.`lat` DESC
+        """
+        c.execute(q)
+
+        return [{
+            'id': i[0],
+            'fbid': i[1],
+            'name': i[2],
+            'last_active': i[3],
+            'status': i[4],
+            'recorded': i[5],
+        } for i in c.fetchall()]
+
+
+
+
