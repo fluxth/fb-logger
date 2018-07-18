@@ -1,6 +1,7 @@
 import collections
 import codecs
 import json
+import logging
 
 from datetime import datetime
 
@@ -28,9 +29,13 @@ def timestamp(format='%Y-%m-%d %H:%M:%S'):
 
 def tsprint(pl, *args, **kwargs):
     ts = timestamp()
+    # TODO: Make entire different func for info print
+    logging.info(pl)
+    
     print('[{}] {}'.format(ts, pl), *args, **kwargs)
 
 def dprint(pl, *args, **kwargs):
     # Check if debug is enabled
     if True:
+        logging.debug(pl)
         print('* {}'.format(pl), *args, **kwargs)

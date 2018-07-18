@@ -1,5 +1,7 @@
 import time
 import sys
+import os
+import logging
 
 from fblogger.Scraper import BuddyList, LongPollReload, NetworkError
 from fblogger.Database import LogDatabase
@@ -21,12 +23,26 @@ class LoggerApp():
 
     def initialize(self):
         self.loadConfig()
+        self.setupLogging()
         self.setupScraper()
         self.setupDatabase()
 
     def loadConfig(self):
         # Load config.json
         self.config = load_config(self.CONFIG_PATH)
+
+    def setupLogging(self):
+        # setup logging
+        logging.basicConfig(
+            filename=self.config['log_file'] if 'log_file' in self.config.keys() else './fblogger.log', 
+            format='[%(asctime)s] %(levelname)s: %(message)s',
+            datefmt='%m/%d/%Y %I:%M:%S %p',
+            level=logging.DEBUG)
+
+        # write PID file
+        with open(self.config['pid_file'] if 'pid_file' in self.config.keys() else './fblogger.pid', 'w') as f:
+            f.write(str(os.getpid()))
+        tsprint('Logging started.')
 
     def setupScraper(self):
         self.scraper = BuddyList(

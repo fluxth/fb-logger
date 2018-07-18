@@ -5,6 +5,8 @@
 	},
 	"debug": false,
 	"database": "./fblog.db",
+	"pid_file": "./fblogger.pid",
+    "log_file": "./fblogger.log",
 	"scraper": {
 		"cache_lb": true,
 		"sticky_expire": 1800,

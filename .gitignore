@@ -3,6 +3,9 @@
 *.db
 config.json
 
+*.pid
+*.log
+
 *.env
 *.pyc
 *.pyo
