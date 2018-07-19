@@ -39,3 +39,34 @@ In long-running mode, use:
 ```
 $ kill -9 $(cat fblogger.pid)
 ```
+
+## Config
+
+All the configuration options available in `config.json`
+
+### General Configuration
+| Key 						| Type 		| Description 	|
+| --- 						| --- 		| --- 			|
+| `debug` 					| Boolean	| (Not Implemented) Enable debugging functionalities. |
+| `database` 				| String	| **_Required._** Path to database file. |
+| `pid_file` 				| String	| Path to file containing PID. |
+| `log_file` 				| String	| Path to runtime log file. |
+
+### Credential Configuration
+| Key 						| Type 		| Description 	|
+| --- 						| --- 		| --- 			|
+| `credentials.c_user` 		| String 	| **_Required._** Facebook numeric ID. |
+| `credentials.xs` 			| String	| **_Required._** Value of `xs` cookie on Facebook web. |
+
+### Scraper Configuration
+| Key 						| Type 		| Description 	|
+| --- 						| --- 		| --- 			|
+| `scraper.cache_lb` 		| Boolean	| |
+| `scraper.sticky_expire` 	| Integer	| Seconds to invalidate sticky cookie cache. |
+| `scraper.longpoll`	 	| Boolean	| (Not Implemented) Enables longpolling. |
+| `scraper.longpoll_timeout`| Boolean	| (Not Implemented) Seconds to wait for a longpoll request. |
+| `scraper.poll_interval` 	| Integer	| Seconds to wait until new full request. (Not used if in longpoll mode) |
+| `scraper.request_timeout`	| Integer	| Seconds to wait for a full request. |
+| `scraper.retry_timeout` 	| Integer	| Seconds to wait before trying again in case of error. |
+| `scraper.retry_limit` 	| Integer	| Limit of failed retry attempts. |
+| `scraper.chill_timeout` 	| Integer	| Seconds to wait if retry attempt reached limit. |
