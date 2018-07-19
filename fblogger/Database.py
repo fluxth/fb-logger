@@ -29,13 +29,13 @@ class LogDatabase():
 
     _users = []
 
-    def __init__(self, path):
+    def __init__(self, path, *args, **kwargs):
         self.PATH = path
-        self.connect()
+        self.connect(*args, **kwargs)
         self.initialize()
 
-    def connect(self):
-        self.conn = sqlite3.connect(self.PATH)
+    def connect(self, *args, **kwargs):
+        self.conn = sqlite3.connect(self.PATH, *args, **kwargs)
 
     def initialize(self):
         c = self.conn.cursor()
@@ -130,7 +130,7 @@ class LogDatabase():
         #     ORDER BY `u`.`id` DESC
         # """
         q = """
-            SELECT `u`.`id`, `l`.`id`, `u`.`name`, `l`.`lat`, `l`.`p`, `l`.`ts`
+            SELECT `u`.`id`, `u`.`fbid`, `u`.`name`, `l`.`lat`, `l`.`p`, `l`.`ts`
             FROM `users` AS `u`
             LEFT OUTER JOIN `logs` AS `l` ON `u`.`id` = `l`.`uid`
             WHERE `l`.`id` IN (SELECT MAX(`id`) FROM `logs` GROUP BY `uid`)
