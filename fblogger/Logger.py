@@ -32,7 +32,18 @@ class LoggerApp():
         self.config = load_config(self.CONFIG_PATH)
 
     def getConfig(self, key, default=None):
-        # TODO: Add recursive key later
+        if '.' in key:
+            keys = key.split('.')
+            data = self.config
+
+            try:
+                for k in keys:
+                    data = data[k]
+            except ValueError:
+                return default
+
+            return data
+
         return self.config[key] if key in self.config.keys() else default
 
     def setupLogging(self):
