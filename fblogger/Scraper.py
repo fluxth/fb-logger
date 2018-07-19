@@ -104,6 +104,8 @@ class BuddyList:
             resp = self.session.send(prep, timeout=timeout)
         except requests.exceptions.ReadTimeout as m:
             raise NetworkError('HTTP Read Timeout ({})'.format(m))
+        except requests.exceptions.ConnectionError as m:
+            raise NetworkError('Connection Error ({})'.format(m))
 
         resp.raise_for_status()
 
