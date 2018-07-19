@@ -2,6 +2,7 @@ import collections
 import codecs
 import json
 import logging
+import sys
 
 from datetime import datetime
 
@@ -31,7 +32,7 @@ def tsprint(pl, *args, **kwargs):
     ts = timestamp()
     # TODO: Make entire different func for info print
     logging.info(pl)
-    
+
     print('[{}] {}'.format(ts, pl), *args, **kwargs)
 
 def dprint(pl, *args, **kwargs):
