@@ -24,6 +24,11 @@ def timeago(time):
         diff = now - time
     elif not time:
         diff = now - now
+    else:
+        try:
+            diff = now - datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            return time
 
     second_diff = int(diff.seconds)
     day_diff = diff.days
@@ -33,7 +38,7 @@ def timeago(time):
 
     if day_diff == 0:
         if second_diff < 10:
-            return ""
+            return "just now"
         if second_diff < 60:
             return str(second_diff) + "s"
         if second_diff < 120:
@@ -41,7 +46,7 @@ def timeago(time):
         if second_diff < 3600:
             return str(math.floor(second_diff / 60)) + "m"
         if second_diff < 7200:
-            return "h"
+            return "1h"
         if second_diff < 86400:
             return str(math.floor(second_diff / 3600)) + "h"
     if day_diff == 1:
