@@ -31,16 +31,20 @@ class LoggerApp():
         # Load config.json
         self.config = load_config(self.CONFIG_PATH)
 
+    def getConfig(self, key, default=None):
+        # TODO: Add recursive key later
+        return self.config[key] if key in self.config.keys() else default
+
     def setupLogging(self):
         # setup logging
         logging.basicConfig(
-            filename=self.config['log_file'] if 'log_file' in self.config.keys() else './fblogger.log', 
+            filename=self.getConfig('log_file', './fblogger.log'), 
             format='[%(asctime)s] %(levelname)s: %(message)s',
             datefmt='%m/%d/%Y %I:%M:%S %p',
             level=logging.DEBUG)
 
         # write PID file
-        with open(self.config['pid_file'] if 'pid_file' in self.config.keys() else './fblogger.pid', 'w') as f:
+        with open(self.getConfig('pid_file', './fblogger.pid'), 'w') as f:
             f.write(str(os.getpid()))
         tsprint('Logging started.')
 
