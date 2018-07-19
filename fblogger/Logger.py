@@ -120,10 +120,10 @@ class LoggerApp():
             tsprint('User Quit')
         except Exception as e:
             logging.fatal(e, exc_info=True)
+        finally:
+            tsprint('Terminating...')
 
             # Delete PID file
             os.remove(self.getConfig('pid_file', './fblogger.log'))
-
-        finally:
-            tsprint('Terminating...')
+            
             sys.exit(0)
