@@ -3,7 +3,7 @@ import sys
 import os
 import logging
 
-from fblogger.Scraper import BuddyList, LongPollReload, NetworkError
+from fblogger.Scraper import BuddyList, LongPollReload, NetworkError, InvalidResponse
 from fblogger.Database import LogDatabase
 from fblogger.Utils import load_config, tsprint, dprint
 
@@ -109,9 +109,15 @@ class LoggerApp():
                     time.sleep(0.1)
 
             except LongPollReload as m:
-                tsprint('Longpoll Reload: '.format(m))
+                tsprint('Longpoll Reload: {}'.format(m))
                 self.scraper.resetSession()
                 continue
+            except InvalidResponse as m:
+                # TODO: Implement "chill" timeout
+                wait = self.getConfig('scraper.retry_timeout', 30)
+                logging.error(m, exc_info=True)
+                tsprint('Invalid Response: {}, trying again in {}s'.format(m, wait))
+                time.sleep(wait)
 
     def run(self):
         try:
@@ -125,5 +131,5 @@ class LoggerApp():
 
             # Delete PID file
             os.remove(self.getConfig('pid_file', './fblogger.log'))
-            
+
             sys.exit(0)
