@@ -2,6 +2,7 @@
 
 *.db
 config.json
+secrets.json
 
 *.pid
 *.log
