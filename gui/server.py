@@ -14,11 +14,7 @@ app = Flask(__name__)
 config = load_config('./config.json')
 db = LogDatabase(config['database'], check_same_thread=False)
 
-secrets = None
-with open('./secrets.json', 'r') as f:
-    secrets = json.load(f)
-
-app.secret_key = secrets['flask']
+app.secret_key = config['secrets']['flask']
 
 def timeago(time):
     now = datetime.now()

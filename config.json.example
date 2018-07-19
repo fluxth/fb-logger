@@ -3,6 +3,10 @@
         "c_user": "FACEBOOK ID HERE",
         "xs": "FACEBOOK SESSION COOKIE HERE"
     },
+    "secrets": {
+        "branca": "YOUR SECRET 32 BYTES HERE",
+        "flask": "YOUR SECRET HERE"
+    },
     "debug": false,
     "database": "./fblog.db",
     "pid_file": "./fblogger.pid",
