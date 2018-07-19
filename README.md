@@ -7,6 +7,11 @@ First, clone this repository to your server/computer:
 $ git clone https://github.com/fluxTH/fb-logger.git
 ```
 
+Next, install the required dependencies using `pip`:
+```
+$ pip3 install -r requirements.txt
+```
+
 Now, create your `config.json` file from the example provided:
 ```
 $ cd fb-logger/
