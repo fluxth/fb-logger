@@ -123,12 +123,18 @@ class LoggerApp():
                 tsprint('Longpoll Reload: {}'.format(m))
                 self.scraper.resetSession()
                 continue
+
             except InvalidResponse as m:
                 # TODO: Implement "chill" timeout
                 wait = self.getConfig('scraper.retry_timeout', 30)
+
                 logging.error(m, exc_info=True)
                 tsprint('Invalid Response: {}, trying again in {}s'.format(m, wait))
+
                 time.sleep(wait)
+
+                self.scraper.resetSession()
+                continue
 
     def run(self):
         try:
