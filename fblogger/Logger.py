@@ -113,5 +113,9 @@ class LoggerApp():
         try:
             self.mainLoop()
         except KeyboardInterrupt:
-            tsprint('User Quit.')
+            tsprint('User Quit')
+        except Exception as e:
+            logging.fatal(e, exc_info=True)
+        finally:
+            tsprint('Terminating...')
             sys.exit(0)
