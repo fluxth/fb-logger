@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Users - FBLogger GUI{% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+ 
+{% block content %}
+<div class="ui statistics container">
+  <div class="statistic">
+    <div class="value">
+      22
+    </div>
+    <div class="label">
+      Saves
+    </div>
+  </div>
+  <div class="statistic">
+    <div class="text value">
+      Three<br>
+      Thousand
+    </div>
+    <div class="label">
+      Signups
+    </div>
+  </div>
+  <div class="statistic">
+    <div class="value">
+      <i class="plane icon"></i> 5
+    </div>
+    <div class="label">
+      Flights
+    </div>
+  </div>
+  <div class="statistic">
+    <div class="value">
+      <img src="/images/avatar/small/joe.jpg" class="ui circular inline image">
+      42
+    </div>
+    <div class="label">
+      Team Members
+    </div>
+  </div>
+</div>
+<div class="ui container"><a href="/logout">Log out</a></div>
+<div class="ui items container">
+  {% for user in users -%}
+  <div class="item">
+    <a class="ui tiny image" href="/user/{{ user.id }}">
+      <img src="https://graph.facebook.com/v2.6/{{ user.fbid }}/picture?type=normal">
+    </a>
+    <div class="content">
+      <a class="header" href="/user/{{ user.id }}">{{ user.name or user.fbid }}</a>
+      <div class="description">
+        <p>
+          {% if user.status == 2 %}
+            <span class="ui green empty circular label"></span> &nbsp;
+            ONLINE
+          {% elif user.status == 0 %}
+            <span class="ui yellow empty circular label"></span> &nbsp;
+            {% if user.last_active != -1 %}
+              IDLE FOR {{ user.last_active|timeago }}
+            {% else %}
+              IDLE
+            {% endif %}
+          {% else %}
+            <span class="ui grey empty circular label"></span> &nbsp;
+            {% if user.last_active != -1 %}
+              LAST ACTIVE {{ user.last_active|timeago }} AGO
+            {% else %}
+              OFFLINE
+            {% endif %}
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+  {%- endfor %}
+</div>
+{% endblock %}
