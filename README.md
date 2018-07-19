@@ -42,7 +42,7 @@ $ kill -9 $(cat fblogger.pid)
 
 ## Config
 
-All the configuration options available in `config.json`
+All the configuration options available in `config.json`, refer to `config.json.example` for default values.
 
 ### General Configuration
 | Key 						| Type 		| Description 	|
@@ -57,6 +57,12 @@ All the configuration options available in `config.json`
 | --- 						| --- 		| --- 			|
 | `credentials.c_user` 		| String 	| **_Required._** Facebook numeric ID. |
 | `credentials.xs` 			| String	| **_Required._** Value of `xs` cookie on Facebook web. |
+
+### Secret Key Configuration
+| Key 						| Type 		| Description 	|
+| --- 						| --- 		| --- 			|
+| `secrets.brunca` 			| String 	| (Not Implemented) Secret encryption key for brunca tokens. (32 bytes) |
+| `secrets.flask` 			| String	| **_Required._** Web GUI secret encryption key. |
 
 ### Scraper Configuration
 | Key 						| Type 		| Description 	|
