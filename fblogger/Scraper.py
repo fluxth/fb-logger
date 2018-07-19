@@ -5,7 +5,7 @@ import requests
 
 from urllib.parse import urlencode
 
-from fblogger.Utils import tsprint, dprint
+from fblogger.Utils import tsprint, dprint, resolve_dict
 
 class BuddyList:
 
@@ -31,15 +31,22 @@ class BuddyList:
 
     def __init__(self, c_user=None, xs=None):
         self.setCredentials(c_user, xs)
-        self.initializeSession()
-        self.initialized = True
 
     def setConfig(self, config):
         self.config.update(config)
 
+    def getConfig(self, key, default=None):
+        try:
+            return resolve_dict(self.config, key)
+        except ValueError:
+            return default
+
     def setCredentials(self, c_user, xs):
         self.c_user = c_user
         self.xs = xs
+
+        if self.c_user is not None and self.xs is not None:
+            self.initializeSession()
 
     def setLoadBalancerId(self, lb_id=None):
         if lb_id is not None:
@@ -69,6 +76,8 @@ class BuddyList:
         self.setLoadBalancerId()
         self.setClientId()
 
+        self.initialized = True
+
     def resetSession(self):
         self.lb_id = None
         self.client_id = None
@@ -89,7 +98,7 @@ class BuddyList:
         req = requests.Request('GET', '{}?{}'.format(url, urlencode(qs)))
         prep = self.session.prepare_request(req)
 
-        timeout = self.config['request_timeout'] if timeout is None else timeout
+        timeout = self.getConfig('request_timeout', 20) if timeout is None else timeout
 
         try:
             resp = self.session.send(prep, timeout=timeout)
@@ -109,10 +118,10 @@ class BuddyList:
         return json.loads(data)
 
     def checkLoadBalancerInfo(self):
-        if self.lb_data is None or self.config['cache_lb'] is not True:
+        if self.lb_data is None or self.getConfig('cache_lb') is False:
             self.updateLoadBalancerInfo()
 
-        if time.time() - self.lb_timestamp > self.config['sticky_expire']:
+        if time.time() - self.lb_timestamp > self.getConfig('sticky_expire', 1800):
             self.updateLoadBalancerInfo()
             raise LongPollReload('Sticky cookie expired.')
 

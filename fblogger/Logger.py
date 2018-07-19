@@ -2,10 +2,11 @@ import time
 import sys
 import os
 import logging
+import traceback
 
 from fblogger.Scraper import BuddyList, LongPollReload, NetworkError, InvalidResponse
 from fblogger.Database import LogDatabase
-from fblogger.Utils import load_config, tsprint, dprint
+from fblogger.Utils import load_config, tsprint, dprint, resolve_dict
 
 class LoggerApp():
 
@@ -32,19 +33,10 @@ class LoggerApp():
         self.config = load_config(self.CONFIG_PATH)
 
     def getConfig(self, key, default=None):
-        if '.' in key:
-            keys = key.split('.')
-            data = self.config
-
-            try:
-                for k in keys:
-                    data = data[k]
-            except ValueError:
-                return default
-
-            return data
-
-        return self.config[key] if key in self.config.keys() else default
+        try:
+            return resolve_dict(self.config, key)
+        except ValueError:
+            return default
 
     def setupLogging(self):
         # setup logging
@@ -61,13 +53,13 @@ class LoggerApp():
 
     def setupScraper(self):
         self.scraper = BuddyList(
-            c_user  = self.config['credentials']['c_user'], 
-            xs      = self.config['credentials']['xs']
+            c_user  = self.getConfig('credentials.c_user'), 
+            xs      = self.getConfig('credentials.xs')
         )
-        self.scraper.setConfig(self.config['scraper'])
+        self.scraper.setConfig(self.getConfig('scraper'))
 
     def setupDatabase(self):
-        self.db = LogDatabase(self.config['database'])
+        self.db = LogDatabase(self.getConfig('database'))
 
     def mainLoop(self):
         while True:
@@ -143,6 +135,7 @@ class LoggerApp():
             tsprint('User Quit')
         except Exception as e:
             logging.fatal(e, exc_info=True)
+            traceback.print_tb(e.__traceback__)
         finally:
             tsprint('Terminating...')
 
