@@ -142,6 +142,6 @@ class LoggerApp():
             tsprint('Terminating...')
 
             # Delete PID file
-            os.remove(self.getConfig('pid_file', './fblogger.log'))
+            os.remove(self.getConfig('pid_file', './fblogger.pid'))
 
             sys.exit(0)
