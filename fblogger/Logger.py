@@ -63,14 +63,16 @@ class LoggerApp():
 
     def mainLoop(self):
         while True:
-            dprint('Initial GET request')
 
-            blist = self.scraper.getBuddyList()
-            flist = self.scraper.parseFbResponse(blist)
-            self.scraper.saveToDB(flist, self.db, full=True)
-
-            seq = 2
             try:
+                dprint('Initial GET request')
+
+                blist = self.scraper.getBuddyList()
+                flist = self.scraper.parseFbResponse(blist)
+                self.scraper.saveToDB(flist, self.db, full=True)
+
+                seq = 2
+            
                 while True:
                     if 'seq' in blist.keys():
                         seq = blist['seq']
