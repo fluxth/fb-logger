@@ -25,16 +25,16 @@ def load_config(path):
         print('[Details: {}]'.format(m))
         sys.exit(1)
 
-def resolve_dict(in_dict, dotted_str):
+def resolve_dict(parent_dict, dotted_str):
     if '.' in dotted_str:
         keys = dotted_str.split('.')
-        data = in_dict
+        data = parent_dict
 
         for k in keys:
             data = data[k]
 
         return data
-    return in_dict[dotted_str]
+    return parent_dict[dotted_str]
 
 def timestamp(format='%Y-%m-%d %H:%M:%S'):
     return datetime.now().strftime(format)
