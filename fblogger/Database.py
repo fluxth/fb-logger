@@ -11,7 +11,7 @@ class LogDatabase():
             `fbid` integer unique not null,
             `name` varchar(255) null,
             `username` varchar(255) null,
-            `ts` datetime not null default (datetime('now', 'localtime'))
+            `ts` timestamp not null default (strftime('%s', 'now'))
         );
     '''
 
@@ -19,7 +19,7 @@ class LogDatabase():
         CREATE TABLE IF NOT EXISTS `logs` (
             `id` integer unique primary key,
             `uid` integer not null,
-            `ts` datetime not null default (datetime('now', 'localtime')),
+            `ts` timestamp not null default (strftime('%s', 'now')),
             `lat` integer null,
             `p` integer null,
             `vc` integer null,
