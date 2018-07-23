@@ -46,6 +46,13 @@ def users():
     else:
         return redirect('/login')
 
+@app.route('/user/<int:user_id>')
+def user_detail(user_id):
+    if session.get('username', None) is not None:
+        return render_template('user_detail.html', user=db.getUser(user_id), logs=db.getUserActivities(user_id))
+    else:
+        return redirect('/login')
+
 @app.route('/api')
 def api_root():
     return redirect('/')

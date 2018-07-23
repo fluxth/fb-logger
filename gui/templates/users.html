@@ -1,48 +1,9 @@
 {% extends "base.html" %}
 
 {% block title %}Users - FBLogger GUI{% endblock %}
-{% block head %}
-  {{ super() }}
-{% endblock %}
  
 {% block content %}
-<div class="ui statistics container">
-  <div class="statistic">
-    <div class="value">
-      22
-    </div>
-    <div class="label">
-      Saves
-    </div>
-  </div>
-  <div class="statistic">
-    <div class="text value">
-      Three<br>
-      Thousand
-    </div>
-    <div class="label">
-      Signups
-    </div>
-  </div>
-  <div class="statistic">
-    <div class="value">
-      <i class="plane icon"></i> 5
-    </div>
-    <div class="label">
-      Flights
-    </div>
-  </div>
-  <div class="statistic">
-    <div class="value">
-      <img src="/images/avatar/small/joe.jpg" class="ui circular inline image">
-      42
-    </div>
-    <div class="label">
-      Team Members
-    </div>
-  </div>
-</div>
-<div class="ui container"><a href="/logout">Log out</a></div>
+{{ super() }}
 <div class="ui items container">
   {% for user in users -%}
   <div class="item">

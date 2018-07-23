@@ -147,6 +147,50 @@ class LogDatabase():
             'recorded': i[5],
         } for i in c.fetchall()]
 
+    def getUser(self, user_id):
+        c = self.conn.cursor()
+
+        q = """
+            SELECT *
+            FROM `users` AS `u`
+            WHERE `u`.`id` = :uid
+            LIMIT 1
+        """
+        c.execute(q, {
+            'uid': user_id
+        })
+
+        u = c.fetchall()[0]
+
+        return {
+            'id': u[0],
+            'fbid': u[1],
+            'name': u[2],
+            'username': u[3],
+            'added': u[4],
+        }
+
+    def getUserActivities(self, user_id):
+        c = self.conn.cursor()
+
+        q = """
+            SELECT *
+            FROM `logs` AS `l`
+            WHERE `l`.`uid` = :uid
+            ORDER BY `l`.`ts` DESC
+        """
+        c.execute(q, {
+            'uid': user_id
+        })
+
+        return [{
+            'id': i[0],
+            'recorded': i[2],
+            'lat': i[3],
+            'p': i[4],
+            'vc': i[5],
+            'full': i[6],
+        } for i in c.fetchall()]
 
 
 

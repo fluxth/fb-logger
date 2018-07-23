@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.name }} - FBLogger GUI{% endblock %}
+
+{% block content %}
+{{ super() }}
+<div class="ui container">
+  <h1 class="ui center aligned icon header">
+    <img src="https://graph.facebook.com/v2.6/{{ user.fbid }}/picture?type=normal"
+      class="ui circular image">
+    <div class="content">{{ user.name or "[Unnamed]"}}
+      <div class="sub header">
+        {{ user.fbid }}<br>
+        Added {{ user.added|dt }}
+      </div>
+    </div>
+  </h1>
+  <table class="ui celled table">
+    <thead>
+      <tr>
+        <th>Log ID</th>
+        <th>Recorded</th>
+        <th>Status</th>
+        <th>Last Active</th>
+        <th>vc Value</th>
+        <th>Full Fetch</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for log in logs -%}
+      <tr>
+        <td>{{ log.id }}</td>
+        <td><pre>{{ log.recorded|dt }}</pre></td>
+        <td>{{ log.p }}</td>
+        <td><pre>{{ log.lat|dt if log.lat != -1 else 'No Data' }}</pre></td>
+        <td>{{ log.vc }}</td>
+        <td>{{ log.full }}</td>
+      </tr>
+    {%- endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
