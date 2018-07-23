@@ -2,10 +2,12 @@ import random
 import time
 import json
 import requests
+import logging
 
 from urllib.parse import urlencode
 
 from fblogger.Utils import tsprint, dprint, resolve_dict
+
 
 class BuddyList:
 
@@ -103,11 +105,17 @@ class BuddyList:
         try:
             resp = self.session.send(prep, timeout=timeout)
         except requests.exceptions.ReadTimeout as m:
+            logging.error(m, exc_info=True)
             raise NetworkError('HTTP Read Timeout ({})'.format(m))
         except requests.exceptions.ConnectionError as m:
+            logging.error(m, exc_info=True)
             raise NetworkError('Connection Error ({})'.format(m))
 
-        resp.raise_for_status()
+        try:
+            resp.raise_for_status()
+        except requests.exceptions.HTTPError as m:
+            logging.error(m, exc_info=True)
+            raise NetworkError('HTTP Error ({})'.format(m))
 
         return resp.text
 
