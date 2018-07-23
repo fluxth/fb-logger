@@ -63,7 +63,6 @@ class LoggerApp():
 
     def mainLoop(self):
         while True:
-
             try:
                 dprint('Initial GET request')
 
@@ -83,14 +82,30 @@ class LoggerApp():
                         dprint('Polling seq={}'.format(seq))
                         blist = self.scraper.longPoll(seq)
 
+
                     # handle failed polling
                     except NetworkError as m:
-                        tsprint('Network Error: {}'.format(m))
+                        logging.error(m, exc_info=True)
+                        tsprint('Longpoll Network Error: {}'.format(m))
                         
                         # Replace with config values
                         time.sleep(10)
                         continue
 
+                        # threshold then raise another exception to reload
+
+                    except InvalidResponse as m:
+                        logging.error(m, exc_info=True)
+                        tsprint('Longpoll Invalid Response: {}'.format(m))
+                        
+                        # Replace with config values
+                        time.sleep(10)
+                        continue
+
+                        # threshold then raise another exception to reload
+
+
+                    # handle response 
                     if blist['t'] == 'heartbeat':
                         dprint('Longpoll seq={} heartbeat.'.format(seq))
 
@@ -107,15 +122,31 @@ class LoggerApp():
                     else:
                         raise LongPollReload('Got unknown packet type "{}".'.format(blist['t']))
 
+                    # save data
                     if flist is not None:
                         self.scraper.saveToDB(flist, self.db)
+
 
                     # Replace with config values
                     time.sleep(0.1)
 
+
             except LongPollReload as m:
                 tsprint('Longpoll Reload: {}'.format(m))
                 self.scraper.resetSession()
+                continue
+
+            except NetworkError as m:
+                # TODO: Implement "chill" timeout
+                wait = self.getConfig('scraper.retry_timeout', 30)
+
+                logging.error(m, exc_info=True)
+                tsprint('Network Error: {}, trying again in {}s'.format(m, wait))
+
+                time.sleep(wait)
+
+                # threshold then reset session
+                # self.scraper.resetSession()
                 continue
 
             except InvalidResponse as m:
