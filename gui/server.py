@@ -1,6 +1,6 @@
 from flask import Flask, request, session, redirect, render_template, make_response
 
-from ..fblogger.Utils import load_config
+from ..fblogger.Utils import load_config, timeago, format_datetime
 from ..fblogger.Database import LogDatabase
 
 import msgpack
@@ -16,53 +16,8 @@ db = LogDatabase(config['database'], check_same_thread=False)
 
 app.secret_key = config['secrets']['flask']
 
-def timeago(time):
-    now = datetime.now()
-    if type(time) is int:
-        diff = now - datetime.fromtimestamp(time)
-    elif isinstance(time,datetime):
-        diff = now - time
-    elif not time:
-        diff = now - now
-    else:
-        try:
-            diff = now - datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
-        except ValueError:
-            return time
-
-    second_diff = int(diff.seconds)
-    day_diff = diff.days
-
-    if day_diff < 0:
-        return ''
-
-    if day_diff == 0:
-        if second_diff < 10:
-            return "just now"
-        if second_diff < 60:
-            return str(second_diff) + "s"
-        if second_diff < 120:
-            return "1m"
-        if second_diff < 3600:
-            return str(math.floor(second_diff / 60)) + "m"
-        if second_diff < 7200:
-            return "1h"
-        if second_diff < 86400:
-            return str(math.floor(second_diff / 3600)) + "h"
-    if day_diff == 1:
-        return "1d"
-    if day_diff < 7:
-        return str(day_diff) + "d"
-    if day_diff < 31:
-        return str(day_diff / 7) + "w"
-    if day_diff < 365:
-        return str(day_diff / 30) + "mo"
-    return str(day_diff / 365) + " y"
-
-    # diff = int(time.time()) - value
-    # return '{}s'.format(diff)
-
 app.jinja_env.filters['timeago'] = timeago 
+app.jinja_env.filters['dt'] = format_datetime 
 
 @app.route('/')
 def root():
