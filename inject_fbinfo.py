@@ -6,7 +6,10 @@
 # This script injects your friend's name on Facebook to the database.
 # The access token needs to be able to access "real" user ID on FB.
 # Newer FB apps cannot do this, the app needs to be somewhat old.
-# Facebook's Graph Explorer App can do this. So it is preferred. 
+# Since Facebook Graph Explorer App is deprecated, you can use any other older apps.
+# The URL below is from Spotify's app, use Chrome Dev tool to intercept the token.
+#
+# https://www.facebook.com/v2.3/dialog/oauth?client_id=174829003346&response_type=token&state=0&redirect_uri=https%3A%2F%2Faccounts.spotify.com%2Fapi%2Ffacebook%2Foauth%2Faccess_token
 # -------------------------------
 
 from fblogger.Utils import load_config
@@ -21,7 +24,8 @@ db = LogDatabase(config['database'])
 
 print('Inject user info to DB tool\n')
 
-print('Obtain your access token from Graph Explorer app.')
+print('Obtain your access token from Graph Explorer or older app.')
+print('Read the README file or this tool\'s source code to learn more.')
 token = input('Enter FB token > ')
 
 URL = 'https://graph.facebook.com/v2.6/?{qs}'
