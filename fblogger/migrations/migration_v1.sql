@@ -21,4 +21,4 @@ CREATE TABLE IF NOT EXISTS `dbconfig` (
     `value` text null
 );
 
-INSERT OR REPLACE INTO `dbconfig` (`key`, `value`) VALUES ('schema_version', '1')
+INSERT OR REPLACE INTO `dbconfig` (`key`, `value`) VALUES ('schema_version', '1');

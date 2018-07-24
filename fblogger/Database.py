@@ -130,7 +130,7 @@ class LogDatabase():
             next_ver = sc_ver + 1
             tsprint('Migrating to schema v{}...'.format(next_ver))
 
-            target_migration = os.path.join(migrations_path,migration_filename.format(next_ver))
+            target_migration = os.path.join(migrations_path, migration_filename.format(next_ver))
             if not os.path.isfile(target_migration):
                 raise MigrationException('Migration for schema version {} not found: {}'.format(next_ver, target_migration))
 
@@ -143,6 +143,8 @@ class LogDatabase():
 
             if sc_ver < next_ver:
                 retries += 1
+            else:
+                retries = 0
 
         tsprint('Database schema successfully migrated to v{}.'.format(to_version))
         return
