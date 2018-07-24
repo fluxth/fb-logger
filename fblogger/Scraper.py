@@ -10,7 +10,7 @@ from fblogger.Utils import tsprint, dprint, resolve_dict
 from fblogger.Database import LogType
 
 
-class BuddyList:
+class BuddyList():
 
     URL = 'https://{}-edge-chat.facebook.com/pull'
 

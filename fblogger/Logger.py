@@ -5,12 +5,12 @@ import logging
 import traceback
 
 from fblogger.Scraper import BuddyList, LongPollReload, NetworkError, InvalidResponse
-from fblogger.Database import LogDatabase
+from fblogger.Database import LogDatabase, DatabaseException
 from fblogger.Utils import load_config, tsprint, dprint, resolve_dict
 
 class LoggerApp():
 
-    _VERSION = '1.1.0'
+    _VERSION = '1.1.1'
 
     CONFIG_PATH = ''
 
@@ -167,6 +167,10 @@ class LoggerApp():
             self.mainLoop()
         except KeyboardInterrupt:
             tsprint('User Quit')
+        except DatabaseException as e:
+            logging.fatal(e, exc_info=True)
+            print('Database Error: {}'.format(e))
+            traceback.print_tb(e.__traceback__)
         except Exception as e:
             logging.fatal(e, exc_info=True)
             print('FATAL: {}'.format(e))
