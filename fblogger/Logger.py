@@ -168,6 +168,7 @@ class LoggerApp():
             tsprint('User Quit')
         except Exception as e:
             logging.fatal(e, exc_info=True)
+            print('FATAL: {}'.format(e))
             traceback.print_tb(e.__traceback__)
         finally:
             tsprint('Terminating...')
