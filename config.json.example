@@ -8,7 +8,10 @@
         "flask": "YOUR SECRET HERE"
     },
     "debug": false,
-    "database": "./fblog.db",
+    "database": {
+        "path": "./fblogtest.db",
+        "migrations": "./fblogger/migrations/"
+    },
     "pid_file": "./fblogger.pid",
     "log_file": "./fblogger.log",
     "scraper": {

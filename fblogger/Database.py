@@ -1,5 +1,8 @@
 import sqlite3
+import os
 from enum import Enum
+
+from fblogger.Utils import tsprint
 
 class LogType(Enum):
     UNKNOWN = 0
@@ -9,8 +12,10 @@ class LogType(Enum):
 
 class LogDatabase():
 
-    PATH = ''
+    config = None
     conn = None
+
+    SCHEMA_VERSION = 1
 
     _USERS_SCHEMA = '''
         CREATE TABLE IF NOT EXISTS `users` (
@@ -34,28 +39,118 @@ class LogDatabase():
         );
     '''
 
+    _DBCONFIG_SCHEMA = '''
+        CREATE TABLE IF NOT EXISTS `dbconfig` (
+            `key` varchar(255) unique primary key not null,
+            `value` text null
+        );
+    '''
+
     _users = []
 
-    def __init__(self, path, *args, **kwargs):
-        self.PATH = path
+    def __init__(self, config, *args, **kwargs):
+        self.config = config
         self.connect(*args, **kwargs)
         self.initialize()
 
     def connect(self, *args, **kwargs):
-        self.conn = sqlite3.connect(self.PATH, *args, **kwargs)
+        self.conn = sqlite3.connect(self.config.get('path', './fblogger.db'), *args, **kwargs)
 
     def initialize(self):
         c = self.conn.cursor()
 
         c.execute(self._LOGS_SCHEMA)
         c.execute(self._USERS_SCHEMA)
+        c.execute(self._DBCONFIG_SCHEMA)
+
+        self.checkDbConfig()
 
         self.conn.commit()
+
+    def getDbConfig(self, key):
+        c = self.conn.cursor()
+
+        q = "SELECT `value` FROM `dbconfig` WHERE `key` = :key LIMIT 1;"
+        c.execute(q, {
+            'key': key
+        })
+
+        data = c.fetchall()
+        if len(data) > 0:
+            return data[0][0]
+        else:
+            raise KeyError('Key {} not found in DBConfig'.format(key))
+
+    def setDbConfig(self, key, value):
+        c = self.conn.cursor()
+        
+        q = "INSERT OR REPLACE INTO `dbconfig` (`key`, `value`) VALUES (:key, :value)"
+        c.execute(q, {
+            'key': key,
+            'value': str(value),
+        })
+
+        return True if c.rowcount == 1 else False
+
+    def checkDbConfig(self):
+        self.checkSchemaUpdates()
+
+    def checkSchemaUpdates(self):
+        try:
+            sc_ver = int(self.getDbConfig('schema_version'))
+        except KeyError:
+            tsprint('DB schema version not found, assuming freshly installed database...')
+            sc_ver = self.SCHEMA_VERSION
+            self.setDbConfig('schema_version', sc_ver)
+
+        if sc_ver < self.SCHEMA_VERSION:
+            # Update schema
+            tsprint('Updating database schema from v{} to v{}...'.format(sc_ver, self.SCHEMA_VERSION))
+            self.migrateSchema(self.SCHEMA_VERSION)
+        else:
+            tsprint('Database schema up-to-date.')
+
+        return
+
+    def migrateSchema(self, to_version):
+        migrations_path = self.config.get('migrations', './fblogger/migrations/')
+        migration_filename = 'migration_v{}.sql'
+
+        sc_ver = int(self.getDbConfig('schema_version'))
+
+        if sc_ver >= to_version:
+            raise MigrationException('Cannot migrate to current or older schema.')
+
+        c = self.conn.cursor()
+        retries = 0
+        while sc_ver < to_version:
+            if retries >= 3:
+                raise MigrationException('Migration took too many retries to update from v{} to v{}.'.format(sc_ver, next_ver))
+
+            next_ver = sc_ver + 1
+            tsprint('Migrating to schema v{}...'.format(next_ver))
+
+            target_migration = os.path.join(migrations_path,migration_filename.format(next_ver))
+            if not os.path.isfile(target_migration):
+                raise MigrationException('Migration for schema version {} not found: {}'.format(next_ver, target_migration))
+
+            with open(target_migration, 'r') as f:
+                sql = f.read()
+                c.executescript(sql)
+
+            self.conn.commit()
+            sc_ver = int(self.getDbConfig('schema_version'))
+
+            if sc_ver < next_ver:
+                retries += 1
+
+        tsprint('Database schema successfully migrated to v{}.'.format(to_version))
+        return
 
     def updateCachedUsers(self):
         c = self.conn.cursor()
 
-        q = "SELECT `id`, `fbid` FROM `users` ORDER BY `id` ASC"
+        q = "SELECT `id`, `fbid` FROM `users` ORDER BY `id` ASC;"
         c.execute(q)
 
         self._users = c.fetchall()
@@ -73,7 +168,7 @@ class LogDatabase():
 
         c = self.conn.cursor()
 
-        q = "INSERT INTO `users` (`fbid`) VALUES (:fbid)"
+        q = "INSERT INTO `users` (`fbid`) VALUES (:fbid);"
         c.execute(q, {
             'fbid': fbid,
         })
@@ -141,7 +236,7 @@ class LogDatabase():
             FROM `users` AS `u`
             LEFT OUTER JOIN `logs` AS `l` ON `u`.`id` = `l`.`uid`
             WHERE `l`.`id` IN (SELECT MAX(`id`) FROM `logs` GROUP BY `uid`)
-            ORDER BY `l`.`lat` DESC
+            ORDER BY `l`.`lat` DESC;
         """
         c.execute(q)
 
@@ -161,7 +256,7 @@ class LogDatabase():
             SELECT *
             FROM `users` AS `u`
             WHERE `u`.`id` = :uid
-            LIMIT 1
+            LIMIT 1;
         """
         c.execute(q, {
             'uid': user_id
@@ -184,7 +279,7 @@ class LogDatabase():
             SELECT *
             FROM `logs` AS `l`
             WHERE `l`.`uid` = :uid
-            ORDER BY `l`.`ts` DESC
+            ORDER BY `l`.`ts` DESC;
         """
         c.execute(q, {
             'uid': user_id
@@ -199,3 +294,10 @@ class LogDatabase():
             'full': i[6],
         } for i in c.fetchall()]
         
+
+# Exceptions
+class DatabaseException(Exception):
+    pass
+
+class MigrationException(DatabaseException):
+    pass
