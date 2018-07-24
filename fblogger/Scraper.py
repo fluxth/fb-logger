@@ -7,6 +7,7 @@ import logging
 from urllib.parse import urlencode
 
 from fblogger.Utils import tsprint, dprint, resolve_dict
+from fblogger.Database import LogType
 
 
 class BuddyList:
@@ -234,26 +235,61 @@ class BuddyList:
             raise InvalidResponse('"ms" not found when parsing.')
             return False
 
+        chatproxy = None
+        overlay = None
+
         for item in resp['ms']:
             if item['type'] == 'chatproxy-presence':
                 if 'buddyList' not in item.keys():
                     raise InvalidResponse('"buddyList" not found in "chatproxy-presence" when parsing.')
-                    return False
-                return item['buddyList']
+                    chatproxy = False
 
-            dprint(item)
+                chatproxy = item['buddyList']
 
-        return None
+            if item['type'] == 'buddylist_overlay':
+                if 'overlay' not in item.keys():
+                    raise InvalidResponse('"overlay" not found in "buddylist_overlay" when parsing.')
+                    overlay = False
 
-    def saveToDB(self, parsed, db, full=False):
-        if parsed is None:
-            # nothing to save
-            return False
+                overlay = item['overlay']
 
-        self.printActiveUsers(parsed)
-        return db.save(parsed, full=full)
+            if chatproxy is None and overlay is None:
+                dprint(item)
+                return (None, None)
 
-    def printActiveUsers(self, data):
+        return (chatproxy, overlay)
+
+    # Normalizes buddylist_overlay to chatproxy-presence's format
+    def normalizeOverlayResponse(self, resp):
+        output = {}
+        for u, data in resp.items():
+            output[u] = {}
+            if 'a' in data:
+                output[u]['p'] = data['a']
+            if 'la' in data:
+                output[u]['lat'] = data['la']
+            if 'vc' in data:
+                output[u]['vc'] = data['vc']
+
+        return output
+
+    def saveToDB(self, proxy, overlay, db, full=False):
+        if proxy is not None:
+            logtype = LogType.CHATPROXY_RELOAD if full else LogType.CHATPROXY_LONGPOLL
+
+            self.printActiveUsers(proxy, full=full)
+            db.save(proxy, logtype=logtype.value)
+
+        if overlay is not None:
+            logtype = LogType.BUDDYLIST_OVERLAY
+
+            for fbid in overlay:
+                tsprint('Overlay: User {} went {}'.format(fbid, 'online' if overlay[fbid]['a'] == 2 else 'offline'))
+            db.save(self.normalizeOverlayResponse(overlay), logtype=logtype.value)
+
+        return
+
+    def printActiveUsers(self, data, full=False):
         total = len(data)
         active = 0
         idle = 0
@@ -268,7 +304,9 @@ class BuddyList:
             if status == 0:
                 idle += 1
 
-        tsprint('{} active, {} idle, {} total.'.format(active, idle, total))
+        mode = 'Full' if full else 'Longpoll'
+
+        tsprint('ChatProxy [{}]: {} active, {} idle, {} total.'.format(mode, active, idle, total))
 
 
 # Exceptions

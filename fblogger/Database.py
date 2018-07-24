@@ -1,4 +1,11 @@
 import sqlite3
+from enum import Enum
+
+class LogType(Enum):
+    UNKNOWN = 0
+    CHATPROXY_LONGPOLL = 1
+    CHATPROXY_RELOAD = 2
+    BUDDYLIST_OVERLAY = 3
 
 class LogDatabase():
 
@@ -23,7 +30,7 @@ class LogDatabase():
             `lat` integer null,
             `p` integer null,
             `vc` integer null,
-            `full` boolean not null default 0
+            `type` integer not null default 0
         );
     '''
 
@@ -76,7 +83,7 @@ class LogDatabase():
 
         return uid
 
-    def save(self, data, full=False):
+    def save(self, data, logtype=0):
         
         self.updateCachedUsers()
 
@@ -90,8 +97,8 @@ class LogDatabase():
 
             c = self.conn.cursor()
             q = '''
-                INSERT OR IGNORE INTO `logs` (`uid`, `lat`, `p`, `vc`, `full`) 
-                SELECT :uid, :lat, {p}, {vc}, :full 
+                INSERT OR IGNORE INTO `logs` (`uid`, `lat`, `p`, `vc`, `type`) 
+                SELECT :uid, :lat, {p}, {vc}, :type 
                 WHERE NOT EXISTS (
                     SELECT 1 FROM `logs`
                     WHERE `uid` = :uid AND `lat` = :lat AND `p` {pS} {p} AND `vc` {vcS} {vc}
@@ -107,7 +114,7 @@ class LogDatabase():
             c.execute(q, {
                 'uid': int(uid),
                 'lat': int(status['lat']) if 'lat' in status else -2,
-                'full': 1 if full else 0,
+                'type': int(logtype),
             })
 
         return self.conn.commit()
@@ -191,6 +198,4 @@ class LogDatabase():
             'vc': i[5],
             'full': i[6],
         } for i in c.fetchall()]
-
-
-
+        

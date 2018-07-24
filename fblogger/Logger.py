@@ -10,7 +10,7 @@ from fblogger.Utils import load_config, tsprint, dprint, resolve_dict
 
 class LoggerApp():
 
-    _VERSION = '1.0.0'
+    _VERSION = '1.1.0'
 
     CONFIG_PATH = ''
 
@@ -66,21 +66,22 @@ class LoggerApp():
             try:
                 dprint('Initial GET request')
 
-                blist = self.scraper.getBuddyList()
-                flist = self.scraper.parseFbResponse(blist)
-                self.scraper.saveToDB(flist, self.db, full=True)
+                resp = self.scraper.getBuddyList()
+                chatproxy, overlay = self.scraper.parseFbResponse(resp)
+                self.scraper.saveToDB(chatproxy, overlay, self.db, full=True)
 
                 seq = 2
             
                 while True:
-                    if 'seq' in blist.keys():
-                        seq = blist['seq']
+                    if 'seq' in resp.keys():
+                        seq = resp['seq']
 
-                    flist = None
+                    chatproxy = None
+                    overlay = None
 
                     try:
                         dprint('Polling seq={}'.format(seq))
-                        blist = self.scraper.longPoll(seq)
+                        resp = self.scraper.longPoll(seq)
 
 
                     # handle failed polling
@@ -106,25 +107,25 @@ class LoggerApp():
 
 
                     # handle response 
-                    if blist['t'] == 'heartbeat':
+                    if resp['t'] == 'heartbeat':
                         dprint('Longpoll seq={} heartbeat.'.format(seq))
 
-                    elif blist['t'] == 'fullReload':
+                    elif resp['t'] == 'fullReload':
                         dprint('Longpoll seq={} returned fullReload, try saving then reload.'.format(seq))
-                        flist = self.scraper.parseFbResponse(blist)
-                        # dict_merge(flist, fb.parseFbResponse(blist))
+                        chatproxy, overlay = self.scraper.parseFbResponse(resp)
+                        # dict_merge(flist, fb.parseFbResponse(resp))
 
                         raise LongPollReload('Got fullReload from longpoll packet.')
 
-                    elif blist['t'] == 'msg':
-                        flist = self.scraper.parseFbResponse(blist)
+                    elif resp['t'] == 'msg':
+                        chatproxy, overlay = self.scraper.parseFbResponse(resp)
 
                     else:
-                        raise LongPollReload('Got unknown packet type "{}".'.format(blist['t']))
+                        raise LongPollReload('Got unknown packet type "{}".'.format(resp['t']))
 
                     # save data
-                    if flist is not None:
-                        self.scraper.saveToDB(flist, self.db)
+                    if chatproxy is not None or overlay is not None:
+                        self.scraper.saveToDB(chatproxy, overlay, self.db)
 
 
                     # Replace with config values
