@@ -50,7 +50,7 @@ def tsprint(pl, *args, **kwargs):
 def dprint(pl, *args, **kwargs):
     # Check if debug is enabled
     if True:
-        logging.debug(pl)
+        logging.info('* {}'.format(pl))
         print('* {}'.format(pl), *args, **kwargs)
 
 def parse_to_datetime(time):

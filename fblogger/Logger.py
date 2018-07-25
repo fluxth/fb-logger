@@ -44,7 +44,7 @@ class LoggerApp():
             filename=self.getConfig('log_file', './fblogger.log'), 
             format='[%(asctime)s] %(levelname)s: %(message)s',
             datefmt='%m/%d/%Y %I:%M:%S %p',
-            level=logging.DEBUG)
+            level=logging.INFO)
 
         # write PID file
         with open(self.getConfig('pid_file', './fblogger.pid'), 'w') as f:
