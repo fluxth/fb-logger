@@ -47,6 +47,12 @@ def tsprint(pl, *args, **kwargs):
 
     print('[{}] {}'.format(ts, pl), *args, **kwargs)
 
+def tserror(pl, *args, **kwargs):
+    ts = timestamp()
+    logging.error(pl)
+
+    print('[{}] (ERROR) {}'.format(ts, pl), *args, **kwargs)
+
 def dprint(pl, *args, **kwargs):
     # Check if debug is enabled
     if True:
