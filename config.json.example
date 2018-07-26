@@ -18,14 +18,21 @@
         "cache_lb": true,
         "sticky_expire": 1800,
 
+        "loop_frequency": 10,
+        "request_interval": 300,
+
         "longpoll": true,
         "longpoll_timeout": 700,
+        "longpoll_retry_limit": 3,
+        "longpoll_retry_timeout": 10,
+        "longpoll_chill_limit": 6,
+        "longpoll_chill_timeout": 60,
 
-        "poll_interval": 300,
         "request_timeout": 20,
-
-        "retry_timeout": 30,
-        "retry_limit": 2,
-        "chill_timeout": 120
+        "request_retry_limit": 3,
+        "request_retry_timeout": 30,
+        "request_chill_limit": 6,
+        "request_chill_timeout": 120,
+        "request_session_limit": 2
     }
 }

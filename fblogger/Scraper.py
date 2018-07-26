@@ -25,8 +25,9 @@ class BuddyList():
     session = None
     config = {
         "cache_lb": False,
-        "request_timeout": 20,
         "sticky_expire": 1800,
+
+        "request_timeout": 20,
     }
 
     lb_data = None
@@ -199,6 +200,7 @@ class BuddyList():
         data = self.doFbRequest(url, qs)
 
         if data['t'] != 'fullReload':
+            logging.info('msg on fullreload: {}'.format(data))
             raise InvalidResponse('Expected packet type "fullReload" from getBuddyList, got "{}"'.format(data['t']))
 
         return data
@@ -228,7 +230,7 @@ class BuddyList():
             'sticky_pool': self.lb_data['pool']
         }
 
-        return self.doLongPoll(url, qs, 700) 
+        return self.doLongPoll(url, qs, self.getConfig('longpoll_timeout', 700)) 
 
     def parseFbResponse(self, resp):
         if 'ms' not in resp.keys():
@@ -290,6 +292,8 @@ class BuddyList():
         return
 
     def printActiveUsers(self, data, full=False):
+        # Update text and mechanism to calculate, currently not correct data
+
         total = len(data)
         active = 0
         idle = 0
