@@ -16,8 +16,12 @@ db = LogDatabase(config['database'], check_same_thread=False)
 
 app.secret_key = config['secrets']['flask']
 
+def logtype2text(logtype):
+    return LogType(logtype).name
+
 app.jinja_env.filters['timeago'] = timeago 
 app.jinja_env.filters['dt'] = format_datetime 
+app.jinja_env.filters['logtype2text'] = logtype2text
 
 @app.route('/')
 def root():

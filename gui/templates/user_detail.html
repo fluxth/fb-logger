@@ -23,7 +23,7 @@
         <th>Status</th>
         <th>Last Active</th>
         <th>vc Value</th>
-        <th>Full Fetch</th>
+        <th>Fetch Type</th>
       </tr>
     </thead>
     <tbody>
@@ -31,10 +31,16 @@
       <tr>
         <td>{{ log.id }}</td>
         <td><pre>{{ log.recorded|dt }}</pre></td>
-        <td>{{ log.p }}</td>
+        <td class="{{ 'disabled ' if log.p is none }}
+          {{- 'positive ' if log.p == 2 }}
+          {{- 'warning' if log.p == 0 }}">
+          {{- log.p -}}
+        </td>
         <td><pre>{{ log.lat|dt if log.lat != -1 else 'No Data' }}</pre></td>
-        <td>{{ log.vc }}</td>
-        <td>{{ log.full }}</td>
+        <td class="{{ 'disabled ' if log.p is none }}">
+          {{ log.vc }}
+        </td>
+        <td>{{ log.full|logtype2text }}</td>
       </tr>
     {%- endfor %}
     </tbody>
