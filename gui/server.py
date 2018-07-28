@@ -1,7 +1,7 @@
 from flask import Flask, request, session, redirect, render_template, make_response
 
-from ..fblogger.Utils import load_config, timeago, format_datetime
-from ..fblogger.Database import LogDatabase
+from fblogger.Utils import load_config, timeago, format_datetime
+from fblogger.Database import LogDatabase, LogType
 
 import msgpack
 import json
