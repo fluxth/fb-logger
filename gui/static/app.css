@@ -1,0 +1,24 @@
+.ui.table pre {
+    margin: 0;
+}
+
+canvas.timeline {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    /* border: 1px solid #000; */
+}
+
+div.timeline {
+    margin-bottom: 20px;
+}
+
+h4.timeline-header {
+    margin-bottom: 0;
+    text-align: center;
+}
+
+div.timeline-button {
+    text-align: center;
+    margin-bottom: 40px;
+}

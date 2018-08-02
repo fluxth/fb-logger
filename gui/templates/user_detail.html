@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ user.name }} - FBLogger GUI{% endblock %}
+{% block title %}{{ user.name or user.fbid }} - FBLogger GUI{% endblock %}
 
 {% block content %}
 {{ super() }}
@@ -15,6 +15,25 @@
       </div>
     </div>
   </h1>
+  <div class="timeline-group">
+    <div class="timeline">
+      <h4 class="timeline-header">Today</h4>
+      <canvas class="timeline" width="600" height="45" id="timeline-1" data-current-time="{{ timeline_now }}" data-plot="{{ timeline[0]|quotejson }}"></canvas>
+    </div>
+    <div class="timeline">
+      <h4 class="timeline-header">Yesterday</h4>
+      <canvas class="timeline" width="600" height="45" id="timeline-2" data-current-time="1" data-plot="{{ timeline[1]|quotejson }}"></canvas>
+    </div>
+  </div>
+  <div class="timeline-button">
+    <div class="ui pointing below red label error-msg hidden"></div>
+    <br>
+    <button class="ui basic labeled icon button timeline-button" data-loaded="2" data-uid="{{ user.id }}">
+      <i class="plus icon"></i>
+      Load more...
+    </button>
+  </div>
+  
   <table class="ui celled table">
     <thead>
       <tr>
@@ -40,7 +59,7 @@
         <td class="{{ 'disabled ' if log.p is none }}">
           {{ log.vc }}
         </td>
-        <td>{{ log.full|logtype2text }}</td>
+        <td>{{ log.type|logtype2text }}</td>
       </tr>
     {%- endfor %}
     </tbody>

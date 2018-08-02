@@ -281,7 +281,8 @@ class LogDatabase():
             SELECT *
             FROM `logs` AS `l`
             WHERE `l`.`uid` = :uid
-            ORDER BY `l`.`ts` DESC;
+            ORDER BY `l`.`id` DESC
+            LIMIT 100;
         """
         c.execute(q, {
             'uid': user_id
@@ -293,8 +294,26 @@ class LogDatabase():
             'lat': i[3],
             'p': i[4],
             'vc': i[5],
-            'full': i[6],
+            'type': i[6],
         } for i in c.fetchall()]
+
+    def getTimelinePlotData(self, user_id, start):
+        c = self.conn.cursor()
+
+        q = """
+            SELECT `l`.`ts`, `l`.`p`, `l`.`type`
+            FROM `logs` AS `l`
+            WHERE `l`.`uid` = :uid AND `l`.`lat` >= :start AND `l`.`lat` <= :end
+            ORDER BY `l`.`id` ASC;
+        """
+        c.execute(q, {
+            'uid': user_id,
+            'start': start,
+            'end': start + 86400
+        })
+
+        return [[int(i[0] - start), i[1], i[2]] for i in c.fetchall()]
+
         
 
 # Exceptions
