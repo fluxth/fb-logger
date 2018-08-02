@@ -17,6 +17,8 @@ class LoggerApp():
     scraper = None
     db = None
 
+    last_ping = 0
+
     errors = {
         'longpoll': {
             'NetworkError': 0,
@@ -139,10 +141,19 @@ class LoggerApp():
         
         raise ContinueLoop
 
+    def ping(self):
+        if time.time() - self.last_ping > self.getConfig('ping_interval', 300):
+            self.db.ping()
+            self.last_ping = time.time()
+
+        return
+
     def mainLoop(self):
         while True:
             try:
                 dprint('Initial GET request')
+
+                self.ping()
 
                 resp = self.scraper.getBuddyList()
                 chatproxy, overlay = self.scraper.parseFbResponse(resp)
@@ -166,6 +177,8 @@ class LoggerApp():
 
                     chatproxy = None
                     overlay = None
+
+                    self.ping()
 
                     try:
                         dprint('Polling seq={}'.format(seq))

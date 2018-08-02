@@ -15,7 +15,7 @@ class LogDatabase():
     config = None
     conn = None
 
-    SCHEMA_VERSION = 1
+    SCHEMA_VERSION = 2
 
     _USERS_SCHEMA = '''
         CREATE TABLE IF NOT EXISTS `users` (
@@ -36,6 +36,12 @@ class LogDatabase():
             `p` integer null,
             `vc` integer null,
             `type` integer not null default 0
+        );
+    '''
+
+    _PINGS_SCHEMA = '''
+        CREATE TABLE IF NOT EXISTS `pings` (
+            `ts` timestamp unique primary key not null default (strftime('%s', 'now'))
         );
     '''
 
@@ -215,6 +221,14 @@ class LogDatabase():
             })
 
         return self.conn.commit()
+
+    def ping(self):
+        c = self.conn.cursor()
+
+        q = 'INSERT OR IGNORE INTO `pings` DEFAULT VALUES;'
+        c.execute(q)
+
+        return c.lastrowid
 
     def getUnnamedUsers(self):
         c = self.conn.cursor()
