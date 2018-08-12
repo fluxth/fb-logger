@@ -137,7 +137,10 @@ class BuddyList():
             self.updateLoadBalancerInfo()
             raise LongPollReload('Sticky cookie expired.')
 
-    def updateLoadBalancerInfo(self):
+    def updateLoadBalancerInfo(self, lb_info=None):
+            if lb_info is not None:
+                self.lb_data = lb_info
+
             self.lb_data = self.getLoadBalancerInfo()
             self.lb_timestamp = time.time()
 
@@ -162,7 +165,9 @@ class BuddyList():
         }
 
         data = self.doFbRequest(url, qs)
+        return self.parseLoadBalancerInfo(data)
 
+    def parseLoadBalancerInfo(self, data):
         if data['t'] != 'lb':
             raise InvalidResponse('Expected packet type "lb" from getLoadBalancerInfo.')
             return False
@@ -198,6 +203,11 @@ class BuddyList():
         }
 
         data = self.doFbRequest(url, qs)
+
+        if data['t'] == 'lb':
+            tsprint('Got "lb" on fullreload, applying then reconnecting...')
+            self.updateLoadBalancerInfo(self.parseLoadBalancerInfo(data))
+            raise ContinueLoop
 
         if data['t'] != 'fullReload':
             logging.info('msg on fullreload: {}'.format(data))

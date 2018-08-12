@@ -204,6 +204,11 @@ class LoggerApp():
                     if resp['t'] == 'heartbeat':
                         dprint('Longpoll seq={} heartbeat.'.format(seq))
 
+                    elif resp['t'] == 'lb':
+                        tsprint('Got "lb" on longpoll seq={}, applying then reconnecting...'.format(seq))
+                        self.scraper.updateLoadBalancerInfo(self.scraper.parseLoadBalancerInfo(resp))
+                        continue
+
                     elif resp['t'] == 'fullReload':
                         dprint('Longpoll seq={} returned fullReload, try saving then reload.'.format(seq))
                         chatproxy, overlay = self.scraper.parseFbResponse(resp)
@@ -248,6 +253,9 @@ class LoggerApp():
                     )
                 except ContinueLoop:
                     continue
+
+            except ContinueLoop:
+                continue
 
     def run(self):
         try:
