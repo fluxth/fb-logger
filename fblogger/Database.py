@@ -315,7 +315,7 @@ class LogDatabase():
         c = self.conn.cursor()
 
         q = """
-            SELECT `l`.`ts`, `l`.`p`, `l`.`type`
+            SELECT `l`.`lat`, `l`.`p`, `l`.`type`
             FROM `logs` AS `l`
             WHERE `l`.`uid` = :uid AND `l`.`lat` >= :start AND `l`.`lat` <= :end
             ORDER BY `l`.`id` ASC;
