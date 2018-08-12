@@ -67,6 +67,7 @@ class LogDatabase():
 
         c.execute(self._LOGS_SCHEMA)
         c.execute(self._USERS_SCHEMA)
+        c.execute(self._PINGS_SCHEMA)
         c.execute(self._DBCONFIG_SCHEMA)
 
         self.checkDbConfig()

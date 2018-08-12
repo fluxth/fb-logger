@@ -9,7 +9,7 @@ from fblogger.Utils import load_config, tsprint, tserror, dprint, resolve_dict
 
 class LoggerApp():
 
-    _VERSION = '1.2.0'
+    _VERSION = '1.3.0'
 
     CONFIG_PATH = ''
 
