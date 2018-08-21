@@ -9,7 +9,7 @@ from fblogger.Utils import load_config, tsprint, tserror, dprint, resolve_dict
 
 class LoggerApp():
 
-    _VERSION = '1.3.0'
+    _VERSION = '1.3.1'
 
     CONFIG_PATH = ''
 
@@ -108,7 +108,7 @@ class LoggerApp():
         else:
             wait = self.getConfig('scraper.request_retry_timeout', 30)
 
-        tsprint('Waiting {}s before retrying FullRequest...'.format(wait))
+        tsprint('Waiting {}s before retrying FullRequest ({})...'.format(wait, err_count))
         time.sleep(wait)
 
         # threshold then reset session
@@ -136,7 +136,7 @@ class LoggerApp():
         else:
             wait = self.getConfig('scraper.longpoll_retry_timeout', 10)
 
-        tsprint('Waiting {}s before retrying longpoll...'.format(wait))
+        tsprint('Waiting {}s before retrying longpoll ({})...'.format(wait, err_count))
         time.sleep(wait)
         
         raise ContinueLoop
@@ -157,6 +157,10 @@ class LoggerApp():
 
                 resp = self.scraper.getBuddyList()
                 chatproxy, overlay = self.scraper.parseFbResponse(resp)
+                    
+                # reset error counter then save response
+                self.resetErrorCounter(only_mode='full')
+                
                 self.scraper.saveToDB(chatproxy, overlay, self.db, full=True)
 
                 # Longpoll not enabled
@@ -205,12 +209,12 @@ class LoggerApp():
                         dprint('Longpoll seq={} heartbeat.'.format(seq))
 
                     elif resp['t'] == 'lb':
-                        tsprint('Got "lb" on longpoll seq={}, applying then reconnecting...'.format(seq))
+                        tsprint('Got "lb" on longpoll seq={}, applying then reloading...'.format(seq))
                         self.scraper.updateLoadBalancerInfo(self.scraper.parseLoadBalancerInfo(resp))
-                        continue
+                        raise LongPollReload('Got lb from longpoll packet.')
 
                     elif resp['t'] == 'fullReload':
-                        dprint('Longpoll seq={} returned fullReload, try saving then reload.'.format(seq))
+                        dprint('Longpoll seq={} returned fullReload, try saving then reloading.'.format(seq))
                         chatproxy, overlay = self.scraper.parseFbResponse(resp)
                         # dict_merge(flist, fb.parseFbResponse(resp))
 
