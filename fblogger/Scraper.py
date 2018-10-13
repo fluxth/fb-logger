@@ -42,7 +42,7 @@ class BuddyList():
     def getConfig(self, key, default=None):
         try:
             return resolve_dict(self.config, key)
-        except ValueError:
+        except (KeyError, ValueError):
             return default
 
     def setCredentials(self, c_user, xs):
@@ -91,7 +91,7 @@ class BuddyList():
     def getEndpointUrl(self):
         return self.URL.format(self.lb_id)
 
-    def parseJsonpResponse(self, resp):
+    def sanitizeJsonResponse(self, resp):
         return resp.replace('for (;;); ', '')
 
     def doRequest(self, url, qs, timeout=None):
@@ -122,11 +122,11 @@ class BuddyList():
         return resp.text
 
     def doFbRequest(self, url, qs):
-        data = self.parseJsonpResponse(self.doRequest(url, qs))
+        data = self.sanitizeJsonResponse(self.doRequest(url, qs))
         return json.loads(data)
 
     def doLongPoll(self, url, qs, timeout):
-        data = self.parseJsonpResponse(self.doRequest(url, qs, timeout))
+        data = self.sanitizeJsonResponse(self.doRequest(url, qs, timeout))
         return json.loads(data)
 
     def checkLoadBalancerInfo(self):

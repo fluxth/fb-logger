@@ -47,7 +47,7 @@ class LoggerApp():
     def getConfig(self, key, default=None):
         try:
             return resolve_dict(self.config, key)
-        except ValueError:
+        except (KeyError, ValueError):
             return default
 
     def setupLogging(self):
