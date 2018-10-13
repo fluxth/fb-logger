@@ -3,13 +3,21 @@ import os
 import logging
 import traceback
 
-from fblogger.Scraper import BuddyList, LongPollReload, NetworkError, InvalidResponse
-from fblogger.Database import LogDatabase, DatabaseException
+from fblogger.Scraper import BuddyList
+from fblogger.Database import LogDatabase
 from fblogger.Utils import load_config, tsprint, tserror, dprint, resolve_dict
+
+from fblogger.Exceptions import (
+    ContinueLoop, 
+    LongPollReload, 
+    NetworkError, 
+    InvalidResponse, 
+    DatabaseException
+)
 
 class LoggerApp():
 
-    _VERSION = '1.3.1'
+    _VERSION = '1.3.2'
 
     CONFIG_PATH = ''
 
@@ -61,7 +69,7 @@ class LoggerApp():
         # write PID file
         with open(self.getConfig('pid_file', './fblogger.pid'), 'w') as f:
             f.write(str(os.getpid()))
-        tsprint('Logging started.')
+        tsprint('FB Online-status Logger v{} started.'.format(self._VERSION))
 
     def setupScraper(self):
         self.scraper = BuddyList(
@@ -280,7 +288,3 @@ class LoggerApp():
             # Delete PID file
             os.remove(self.getConfig('pid_file', './fblogger.pid'))
 
-
-# Exceptions
-class ContinueLoop(Exception):
-    pass

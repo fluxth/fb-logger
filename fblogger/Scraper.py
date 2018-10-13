@@ -8,6 +8,14 @@ from urllib.parse import urlencode
 
 from fblogger.Utils import tsprint, dprint, resolve_dict
 from fblogger.Database import LogType
+from fblogger.Exceptions import (
+    ContinueLoop, 
+    BuddyListException, 
+    NotInitialized, 
+    NetworkError, 
+    InvalidResponse,
+    LongPollReload
+)
 
 
 class BuddyList():
@@ -321,23 +329,3 @@ class BuddyList():
         mode = 'Full' if full else 'Longpoll'
 
         tsprint('ChatProxy [{}]: {} active, {} idle, {} total.'.format(mode, active, idle, total))
-
-
-# Exceptions
-
-class BuddyListException(Exception):
-    pass
-
-class NotInitialized(BuddyListException):
-    pass
-
-class NetworkError(BuddyListException):
-    pass
-
-class InvalidResponse(BuddyListException):
-    pass
-
-class LongPollReload(BuddyListException):
-    pass
-
-

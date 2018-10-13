@@ -4,6 +4,8 @@ from enum import Enum
 
 from fblogger.Utils import tsprint
 
+from fblogger.Exceptions import DatabaseException, MigrationException
+
 class LogType(Enum):
     UNKNOWN = 0
     CHATPROXY_LONGPOLL = 1
@@ -329,11 +331,3 @@ class LogDatabase():
 
         return [[int(i[0] - start), i[1], i[2]] for i in c.fetchall()]
 
-        
-
-# Exceptions
-class DatabaseException(Exception):
-    pass
-
-class MigrationException(DatabaseException):
-    pass
